@@ -1,53 +1,63 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerBulletPool : Bullet
+public class PlayerBulletPool : MonoBehaviour
 {
     public static PlayerBulletPool Instance;
 
     public Bullet bulletPrefab;
     public int poolSize = 20;
 
-    protected Queue<Bullet> Bullets = new Queue<Bullet>();
+    private Queue<Bullet> bullets = new Queue<Bullet>();
 
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
         else
+        {
             Destroy(gameObject);
+            return;
+        }
 
-        // Crear el pool
+        // Crear pool inicial
         for (int i = 0; i < poolSize; i++)
         {
-            Bullet b = Instantiate(bulletPrefab);
-            b.gameObject.SetActive(false);
-            Bullets.Enqueue(b);
+            AddBulletToPool();
         }
     }
 
-    // Obtener bala del pool
+    private void AddBulletToPool()
+    {
+        Bullet b = Instantiate(bulletPrefab);
+        b.gameObject.SetActive(false);
+        bullets.Enqueue(b);
+    }
+
     public Bullet GetBullet(Vector3 position, Quaternion rotation)
     {
-        if (Bullets.Count == 0)
+        // Si la cola está vacía o todas las balas están activas, crear una nueva
+        while (bullets.Count > 0)
         {
-            // Si no hay balas disponibles, instanciamos más
-            Bullet b = Instantiate(bulletPrefab);
-            b.gameObject.SetActive(false);
-            Bullets.Enqueue(b);
+            Bullet bullet = bullets.Dequeue();
+            if (bullet != null)
+            {
+                bullet.transform.position = position;
+                bullet.transform.rotation = rotation;
+                bullet.gameObject.SetActive(true);
+                return bullet;
+            }
         }
 
-        Bullet bullet = Bullets.Dequeue();
-        bullet.transform.position = position;
-        bullet.transform.rotation = rotation;
-        bullet.gameObject.SetActive(true);
-        return bullet;
+        // Crear nueva bala si no hay disponibles
+        AddBulletToPool();
+        return GetBullet(position, rotation);
     }
 
-    // Devolver bala al pool
     public void ReturnBullet(Bullet bullet)
     {
+        if (bullet == null) return;
         bullet.gameObject.SetActive(false);
-        Bullets.Enqueue(bullet);
+        bullets.Enqueue(bullet);
     }
 }

@@ -6,6 +6,7 @@ public class WaveController : MonoBehaviour
     public WaveCollection WaveData; // WaveCollection es la clase que tiene List<WaveData> Waves
     public EnemyPool EnemyPool;     // Referencia al pool
     public WaveManager WaveManager; // Referencia al WaveManager
+    
 
     void Start()
     {
@@ -24,6 +25,7 @@ public class WaveController : MonoBehaviour
         }
     }
     
+
     
 
 

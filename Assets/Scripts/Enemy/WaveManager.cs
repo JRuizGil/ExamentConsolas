@@ -7,6 +7,8 @@ public class WaveManager : MonoBehaviour
     public string jsonUrl = "https://kev-games-development.net/Services/WavesTest.json";
     public EnemyPool EnemyPool; // referencia al pool
     private EnemyWave[] waves;
+    public GameObject victoryPanel;
+    public GameObject LosePanel;
 
     void Start()
     {
@@ -28,7 +30,22 @@ public class WaveManager : MonoBehaviour
             Debug.LogError("Error al cargar el JSON: " + www.error);
         }
     }
+    private void OnAllWavesCompleted()
+    {
+        if (victoryPanel != null)
+        {
+            victoryPanel.SetActive(true);
+        }
 
+        Debug.Log("¡Todas las oleadas completadas! Victoria.");
+    }
+    private void OnLosingWaves()
+    {
+        if (LosePanel != null)
+        {
+            LosePanel.SetActive(true);
+        }
+    }
     public IEnumerator SpawnAllWaves()
     {
         if (waves == null || waves.Length == 0) yield break;
@@ -43,7 +60,12 @@ public class WaveManager : MonoBehaviour
                 EnemyPool.SpawnEnemyByType(spawn.Enemy);
             }
 
-            yield return new WaitForSeconds(2f); // espera entre oleadas
+            // Espera opcional entre oleadas
+            yield return new WaitForSeconds(2f);
         }
+        // Todas las oleadas completadas
+        OnAllWavesCompleted();
     }
+
+
 }

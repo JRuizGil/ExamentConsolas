@@ -4,34 +4,35 @@ using UnityEngine;
 /// Clase base para enemigos. Se puede heredar para crear diferentes tipos de enemigos.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
-public class Enemy : MonoBehaviour
+public class Enemy : Character
 {
     [Header("Enemy Settings")]
-    public float speed;          // Velocidad de movimiento
-    public int maxHealth;         // Vida máxima
+    public float speed = 5f; // Velocidad de movimiento
 
-    protected int currentHealth;
-    protected Rigidbody rb;
     protected Transform player;
 
-    protected virtual void Awake()
+    public override void Awake()
     {
-        rb = GetComponent<Rigidbody>();
+        base.Awake(); // Inicializa currentHealth desde Character
+        Rb = GetComponent<Rigidbody>();
 
         // Evitar rotaciones extrañas y movimiento vertical
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-        rb.useGravity = false;
+        Rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        Rb.useGravity = false;
 
         FindPlayer();
     }
 
-    protected virtual void OnEnable()
+    public override void OnEnable()
     {
-        currentHealth = maxHealth;
+        base.OnEnable(); // Reinicia health
         FindPlayer();
+
+        if (Rb != null)
+            Rb.WakeUp();
     }
 
-    protected virtual void FixedUpdate()
+    public override void FixedUpdate()
     {
         MoveTowardsPlayer();
         RotateTowardsPlayer();
@@ -51,21 +52,21 @@ public class Enemy : MonoBehaviour
     }
 
     /// <summary>
-    /// Movimiento hacia el jugador usando Rigidbody.velocity.
+    /// Movimiento hacia el jugador usando Rigidbody.velocity
     /// </summary>
     protected virtual void MoveTowardsPlayer()
     {
-        if (player == null || rb == null) return;
+        if (player == null || Rb == null) return;
 
         Vector3 direction = (player.position - transform.position);
-        direction.y = 0f; // Mantener altura constante
+        direction.y = 0f;
         direction.Normalize();
 
-        rb.linearVelocity = direction * speed; // ← Cambiado de linearVelocity a velocity
+        Rb.linearVelocity = direction * speed; // ✅ velocity correcto
     }
 
     /// <summary>
-    /// Rotación suave hacia el jugador.
+    /// Rotación suave hacia el jugador
     /// </summary>
     protected virtual void RotateTowardsPlayer()
     {
@@ -82,21 +83,23 @@ public class Enemy : MonoBehaviour
     }
 
     /// <summary>
-    /// Recibe daño.
+    /// Recibe daño
     /// </summary>
-    public virtual void TakeDamage(int damage)
+    public override void TakeDamage(int amount)
     {
-        currentHealth -= damage;
-        if (currentHealth <= 0)
+        base.TakeDamage(amount); // Reduce currentHealth desde Character
+        if (IsDead())
+        {
             Die();
+        }
     }
 
     /// <summary>
-    /// Desactiva el enemigo (vuelve a la pool).
+    /// Desactiva el enemigo (vuelve a la pool)
     /// </summary>
     protected virtual void Die()
     {
-        rb.linearVelocity = Vector3.zero; // ← Cambiado también aquí
+        if (Rb != null) Rb.linearVelocity = Vector3.zero;
         gameObject.SetActive(false);
     }
 }

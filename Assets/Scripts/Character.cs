@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-    protected Rigidbody Rb;
-    protected Vector3 Movement;
+    public Rigidbody Rb;
+    public Vector3 Movement;
     public float moveSpeed = 5f;
     public float acceleration = 10f;
     public float deceleration = 10f;

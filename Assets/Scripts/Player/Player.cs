@@ -2,12 +2,13 @@ using UnityEngine;
 
 public class Player : Character
 {
+    public GameObject defeatScreen;
     public override void Awake()
     {
         base.Awake();
     }
 
-    private void Start()
+    public void Start()
     {
         Rb = GetComponent<Rigidbody>();
     }
@@ -46,6 +47,11 @@ public class Player : Character
             Rb.linearVelocity = Vector3.Lerp(Rb.linearVelocity, Vector3.zero, deceleration * Time.deltaTime);
         }
     }
+    public void ApplyPush(Vector3 force)
+    {
+        if (Rb != null)
+            Rb.AddForce(force, ForceMode.Impulse);
+    }
 
     public override void LookAt()
     {
@@ -64,5 +70,14 @@ public class Player : Character
             transform.rotation = targetRotation;
         }
     }
+    private void ShowDefeatScreen()
+    {
+        if (defeatScreen != null)
+        {
+            defeatScreen.SetActive(true);
+        }
 
+        // Opcional: detener el juego
+        Time.timeScale = 0f;
+    }
 }
